@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sales Compass 案件受付票</title>
+  <meta name="description" content="Sales Compassへ顧客応対結果を渡すための空の案件受付票フォームです。入力内容は保存・送信されません。">
+  <meta name="theme-color" content="#0f2742">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="案件受付票">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #4b5563;
+      --line: #cbd5e1;
+      --paper: #ffffff;
+      --bg: #eef2f7;
+      --navy: #0f2742;
+      --danger: #b42318;
+      --field: #ffffff;
+      --soft: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      padding: 10px;
+    }
+
+    .mode-toggle {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+      min-height: 1px;
+      padding: 0;
+      border: 0;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .title {
+      border-bottom: 4px solid var(--navy);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      margin: 0 0 2px;
+      color: var(--navy);
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 27px;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .notice {
+      margin: 12px 0 14px;
+      padding: 10px 12px;
+      border: 1px solid #f7c948;
+      border-left: 5px solid #d97706;
+      border-radius: 6px;
+      background: #fff8e1;
+      color: #4a3410;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 138px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+    }
+
+    .label {
+      color: var(--navy);
+      font-weight: 800;
+      padding-top: 9px;
+    }
+
+    .required {
+      color: var(--danger);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .control {
+      min-width: 0;
+    }
+
+    input,
+    select,
+    textarea {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      border: 1px solid #9ca3af;
+      border-radius: 6px;
+      background: var(--field);
+      color: var(--ink);
+      padding: 9px 10px;
+      min-height: 44px;
+      font: inherit;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    input[type="date"] {
+      min-width: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    select {
+      padding-right: 32px;
+    }
+
+    textarea {
+      min-height: 128px;
+      resize: vertical;
+      white-space: pre-wrap;
+    }
+
+    .hint {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px 9px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      min-height: 32px;
+    }
+
+    .check-item input {
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      flex: 0 0 18px;
+      padding: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--navy);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--navy);
+      padding: 10px 14px;
+      min-height: 44px;
+      font: inherit;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .primary {
+      background: var(--navy);
+      color: #ffffff;
+    }
+
+    .preview-only {
+      display: none;
+    }
+
+    #previewMode:checked ~ .sheet .edit-only {
+      display: none !important;
+    }
+
+    #previewMode:checked ~ .sheet .preview-only {
+      display: block;
+    }
+
+    #previewMode:checked ~ .sheet {
+      max-width: 640px;
+      padding: 14px;
+    }
+
+    #previewMode:checked ~ .sheet .title {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+    }
+
+    #previewMode:checked ~ .sheet h1 {
+      font-size: 25px;
+    }
+
+    #previewMode:checked ~ .sheet .notice {
+      display: none;
+    }
+
+    #previewMode:checked ~ .sheet .fields {
+      gap: 8px;
+    }
+
+    #previewMode:checked ~ .sheet .row {
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 8px;
+      padding-bottom: 7px;
+    }
+
+    #previewMode:checked ~ .sheet .label {
+      padding-top: 4px;
+      font-size: 13px;
+    }
+
+    #previewMode:checked ~ .sheet input,
+    #previewMode:checked ~ .sheet select,
+    #previewMode:checked ~ .sheet textarea {
+      border: 0;
+      border-radius: 0;
+      background: #ffffff;
+      padding: 2px 0;
+      min-height: 0;
+      color: #0b1220;
+      font-weight: 700;
+      pointer-events: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    #previewMode:checked ~ .sheet textarea {
+      min-height: 112px;
+      line-height: 1.55;
+      font-weight: 600;
+    }
+
+    #previewMode:checked ~ .sheet .check-grid {
+      border: 0;
+      background: #ffffff;
+      padding: 0;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 8px;
+    }
+
+    #previewMode:checked ~ .sheet .check-item {
+      min-height: 24px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    #previewMode:checked ~ .sheet .check-item input {
+      width: 14px;
+      height: 14px;
+      min-height: 14px;
+      flex-basis: 14px;
+    }
+
+    #previewMode:checked ~ .sheet .receipt-note {
+      display: block;
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 8px;
+      }
+
+      .sheet {
+        padding: 13px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .label {
+        padding-top: 0;
+      }
+
+      .check-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      #previewMode:checked ~ .sheet {
+        padding: 12px;
+      }
+
+      #previewMode:checked ~ .sheet .row {
+        grid-template-columns: 82px minmax(0, 1fr);
+      }
+
+      #previewMode:checked ~ .sheet .check-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-height: 760px) {
+      #previewMode:checked ~ .sheet {
+        padding: 10px;
+      }
+
+      #previewMode:checked ~ .sheet .fields {
+        gap: 5px;
+      }
+
+      #previewMode:checked ~ .sheet .row {
+        padding-bottom: 5px;
+      }
+
+      #previewMode:checked ~ .sheet textarea {
+        min-height: 86px;
+      }
+
+      #previewMode:checked ~ .sheet .receipt-note {
+        display: none;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+
+      .sheet {
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        max-width: none;
+      }
+
+      .actions,
+      .notice,
+      .hint,
+      .edit-only {
+        display: none !important;
+      }
+
+      .preview-only {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <input class="mode-toggle" id="previewMode" type="checkbox" aria-hidden="true">
+
+  <main class="sheet" aria-label="Sales Compass 案件受付票">
+    <header class="title">
+      <p class="brand">Sales Compass</p>
+      <h1>案件受付票</h1>
+    </header>
+
+    <div class="notice edit-only">
+      個人情報・正式な顧客名は入力しないでください。入力内容は保存・送信されません。入力後、「受付票を表示」を押してスクリーンショットします。
+    </div>
+
+    <section class="fields">
+      <div class="row">
+        <div class="label">応対日 <span class="required edit-only">必須</span></div>
+        <div class="control">
+          <input id="contactDate" type="date" autocomplete="off">
+          <div class="hint edit-only">カレンダーから選択できます。</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">応対種別 <span class="required edit-only">必須</span></div>
+        <div class="control">
+          <select id="contactType">
+            <option value="">選択してください</option>
+            <option>訪問</option>
+            <option>電話</option>
+            <option>メール</option>
+            <option>DM</option>
+            <option>Web会議</option>
+            <option>その他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">顧客名 <span class="required edit-only">必須</span></div>
+        <div class="control">
+          <input id="customerName" type="text" placeholder="例: H鉄工所、M運送、K病院" autocomplete="off">
+          <div class="hint edit-only">正式名称ではなく、検索可能な匿名名を入力します。</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">業種 <span class="required edit-only">必須</span></div>
+        <div class="control">
+          <select id="industry">
+            <option value="">選択してください</option>
+            <option>製造業</option>
+            <option>建設業</option>
+            <option>医療</option>
+            <option>介護</option>
+            <option>運送業</option>
+            <option>小売業</option>
+            <option>士業</option>
+            <option>教育</option>
+            <option>不動産</option>
+            <option>その他</option>
+          </select>
+          <input id="industryOther" class="edit-only" type="text" placeholder="その他の場合に記入" autocomplete="off" style="margin-top:8px;">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">相談内容 <span class="required edit-only">必須</span></div>
+        <div class="control">
+          <textarea id="consultation" placeholder="顧客から聞いたこと、反応、現状、困りごと、気になったことを自然な文章で入力してください。"></textarea>
+          <div class="hint edit-only">短文でも受付できます。営業フェーズや次回アクションはLEONが判断します。</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">回答期限</div>
+        <div class="control">
+          <input id="replyDeadline" type="date" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">緊急度</div>
+        <div class="control">
+          <select id="urgency">
+            <option>未指定</option>
+            <option>通常</option>
+            <option>急ぎ</option>
+            <option>至急</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">添付資料</div>
+        <div class="control">
+          <div class="check-grid">
+            <label class="check-item"><input type="checkbox">ヒアリングシート</label>
+            <label class="check-item"><input type="checkbox">見積書</label>
+            <label class="check-item"><input type="checkbox">メール</label>
+            <label class="check-item"><input type="checkbox">写真</label>
+            <label class="check-item"><input type="checkbox">構成図</label>
+            <label class="check-item"><input type="checkbox">平面図</label>
+            <label class="check-item"><input type="checkbox">製品資料</label>
+            <label class="check-item"><input type="checkbox">過去提案書</label>
+            <label class="check-item"><input type="checkbox">その他</label>
+          </div>
+          <input id="attachmentOther" class="edit-only" type="text" placeholder="その他の添付資料" autocomplete="off" style="margin-top:8px;">
+        </div>
+      </div>
+    </section>
+
+    <p class="receipt-note preview-only">この受付票は営業担当者が知っている事実をLEONへ渡すためのものです。営業フェーズ、必要部署、必要成果物、次回アクションはLEONが判断します。</p>
+
+    <div class="actions">
+      <label class="button primary edit-only" for="previewMode">受付票を表示</label>
+      <label class="button preview-only" for="previewMode">入力画面に戻る</label>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      function pad(value) {
+        value = String(value);
+        return value.length < 2 ? "0" + value : value;
+      }
+
+      function today() {
+        var d = new Date();
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+      }
+
+      var date = document.getElementById("contactDate");
+      if (date && !date.value) {
+        date.value = today();
+      }
+    })();
+  </script>
+</body>
+</html>
