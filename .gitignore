@@ -8,11 +8,14 @@
 !scripts/**
 !tests/
 !tests/**
+!incoming/
+!incoming/README.md
 
 # Explicitly keep Sales Compass operational data and internal docs out.
 customers/
 cases/
-incoming/
+incoming/*
+!incoming/README.md
 sales_compass/
 agents/
 roles/
