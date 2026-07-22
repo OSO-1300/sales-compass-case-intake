@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Sales Compass 案件受付票</title>
-  <meta name="description" content="Sales Compassへ顧客応対結果を渡すための空の案件受付票フォームです。入力内容は保存・送信されません。">
+  <meta name="description" content="Sales Compassへ顧客応対結果を渡すための空の案件受付票フォームです。入力内容は外部送信されません。">
   <meta name="theme-color" content="#0f2742">
   <meta name="color-scheme" content="light">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -443,7 +443,7 @@
     </header>
 
     <div class="notice edit-only">
-      個人情報・正式な顧客名は入力しないでください。入力内容は保存・送信されません。入力後、「受付票を表示」を押してスクリーンショットします。
+      個人情報・正式な顧客名は入力しないでください。入力内容は外部送信されません。入力後、「受付票を表示」を押してスクリーンショットします。
     </div>
 
     <section class="fields">
@@ -546,7 +546,7 @@
 
     <div class="actions">
       <label class="button primary edit-only" for="previewMode" onclick="SC_updateAttachmentSummary()">受付票を表示</label>
-      <button class="button edit-only" type="button" onclick="SC_downloadIntakeJson()">受付JSONを保存</button>
+      <button class="button edit-only" type="button" onclick="SC_downloadIntakeJson()">LEONへ引き継ぐ</button>
       <label class="button preview-only" for="previewMode" onclick="SC_resetForNextCase()">入力画面に戻る</label>
     </div>
   </main>
@@ -654,11 +654,12 @@
         var a = document.createElement("a");
         var datePart = intake.received_date.replace(/-/g, "");
         a.href = url;
-        a.download = "sales-compass-intake-" + datePart + ".json";
+        a.download = "SC-INTAKE-" + datePart + "-001.json";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        window.alert("案件を受領した。\n\nincomingへ格納してくれ。\n\n添付資料を待つ。");
       }
 
       function resetForNextCase() {
