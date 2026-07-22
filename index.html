@@ -195,6 +195,13 @@
       padding: 0;
     }
 
+    .attachment-summary {
+      color: #0b1220;
+      font-weight: 700;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
     .actions {
       display: flex;
       gap: 10px;
@@ -289,6 +296,10 @@
       min-height: 112px;
       line-height: 1.55;
       font-weight: 600;
+    }
+
+    #previewMode:checked ~ .sheet .attachment-summary {
+      display: block;
     }
 
     #previewMode:checked ~ .sheet .check-grid {
@@ -517,18 +528,16 @@
       <div class="row">
         <div class="label">添付資料</div>
         <div class="control">
-          <div class="check-grid">
-            <label class="check-item"><input type="checkbox">ヒアリングシート</label>
-            <label class="check-item"><input type="checkbox">見積書</label>
-            <label class="check-item"><input type="checkbox">メール</label>
-            <label class="check-item"><input type="checkbox">写真</label>
-            <label class="check-item"><input type="checkbox">構成図</label>
-            <label class="check-item"><input type="checkbox">平面図</label>
-            <label class="check-item"><input type="checkbox">製品資料</label>
-            <label class="check-item"><input type="checkbox">過去提案書</label>
-            <label class="check-item"><input type="checkbox">その他</label>
+          <div class="check-grid attachment-edit edit-only">
+            <label class="check-item"><input type="checkbox" name="attachments" value="ネットワーク構成図" onchange="SC_updateAttachmentSummary()">ネットワーク構成図</label>
+            <label class="check-item"><input type="checkbox" name="attachments" value="平面図" onchange="SC_updateAttachmentSummary()">平面図</label>
+            <label class="check-item"><input type="checkbox" name="attachments" value="機器台帳" onchange="SC_updateAttachmentSummary()">機器台帳</label>
+            <label class="check-item"><input type="checkbox" name="attachments" value="機器写真" onchange="SC_updateAttachmentSummary()">機器写真</label>
+            <label class="check-item"><input type="checkbox" name="attachments" value="見積書" onchange="SC_updateAttachmentSummary()">見積書</label>
+            <label class="check-item"><input id="attachmentOtherCheck" type="checkbox" name="attachments" value="その他" onchange="SC_updateAttachmentSummary()">その他</label>
           </div>
-          <input id="attachmentOther" class="edit-only" type="text" placeholder="その他の添付資料" autocomplete="off" style="margin-top:8px;">
+          <input id="attachmentOther" class="edit-only" type="text" placeholder="その他の添付資料" autocomplete="off" style="margin-top:8px;" oninput="SC_updateAttachmentSummary()">
+          <div id="attachmentSummary" class="attachment-summary preview-only">添付予定なし</div>
         </div>
       </div>
     </section>
@@ -536,8 +545,8 @@
     <p class="receipt-note preview-only">この受付票は営業担当者が知っている事実をLEONへ渡すためのものです。営業フェーズ、必要部署、必要成果物、次回アクションはLEONが判断します。</p>
 
     <div class="actions">
-      <label class="button primary edit-only" for="previewMode">受付票を表示</label>
-      <label class="button preview-only" for="previewMode">入力画面に戻る</label>
+      <label class="button primary edit-only" for="previewMode" onclick="SC_updateAttachmentSummary()">受付票を表示</label>
+      <label class="button preview-only" for="previewMode" onclick="SC_resetForNextCase()">入力画面に戻る</label>
     </div>
   </main>
 
@@ -557,6 +566,61 @@
       if (date && !date.value) {
         date.value = today();
       }
+
+      function updateAttachmentSummary() {
+        var summary = document.getElementById("attachmentSummary");
+        if (!summary) {
+          return;
+        }
+
+        var values = [];
+        var checks = document.querySelectorAll('input[name="attachments"]');
+        for (var i = 0; i < checks.length; i += 1) {
+          if (checks[i].checked) {
+            values.push(checks[i].value);
+          }
+        }
+
+        var otherCheck = document.getElementById("attachmentOtherCheck");
+        var otherInput = document.getElementById("attachmentOther");
+        var otherText = otherInput ? otherInput.value.replace(/^\s+|\s+$/g, "") : "";
+        if (otherCheck && otherCheck.checked && otherText) {
+          for (var j = 0; j < values.length; j += 1) {
+            if (values[j] === "その他") {
+              values[j] = "その他（" + otherText + "）";
+            }
+          }
+        }
+
+        summary.textContent = values.length ? values.join("、") : "添付予定なし";
+      }
+
+      function resetForNextCase() {
+        var inputs = document.querySelectorAll("input, select, textarea");
+        for (var i = 0; i < inputs.length; i += 1) {
+          var item = inputs[i];
+          if (item.id === "previewMode") {
+            continue;
+          }
+
+          if (item.type === "checkbox") {
+            item.checked = false;
+          } else if (item.tagName === "SELECT") {
+            item.selectedIndex = 0;
+          } else {
+            item.value = "";
+          }
+        }
+
+        if (date) {
+          date.value = today();
+        }
+        updateAttachmentSummary();
+      }
+
+      window.SC_updateAttachmentSummary = updateAttachmentSummary;
+      window.SC_resetForNextCase = resetForNextCase;
+      updateAttachmentSummary();
     })();
   </script>
 </body>
