@@ -546,6 +546,7 @@
 
     <div class="actions">
       <label class="button primary edit-only" for="previewMode" onclick="SC_updateAttachmentSummary()">受付票を表示</label>
+      <button class="button edit-only" type="button" onclick="SC_downloadIntakeJson()">受付JSONを保存</button>
       <label class="button preview-only" for="previewMode" onclick="SC_resetForNextCase()">入力画面に戻る</label>
     </div>
   </main>
@@ -595,6 +596,71 @@
         summary.textContent = values.length ? values.join("、") : "添付予定なし";
       }
 
+      function selectedAttachments() {
+        var values = [];
+        var checks = document.querySelectorAll('input[name="attachments"]');
+        for (var i = 0; i < checks.length; i += 1) {
+          if (checks[i].checked) {
+            values.push(checks[i].value);
+          }
+        }
+
+        var otherCheck = document.getElementById("attachmentOtherCheck");
+        var otherInput = document.getElementById("attachmentOther");
+        var otherText = otherInput ? otherInput.value.replace(/^\s+|\s+$/g, "") : "";
+        if (otherCheck && otherCheck.checked && otherText) {
+          for (var j = 0; j < values.length; j += 1) {
+            if (values[j] === "その他") {
+              values[j] = "その他（" + otherText + "）";
+            }
+          }
+        }
+
+        return values;
+      }
+
+      function fieldValue(id) {
+        var field = document.getElementById(id);
+        return field ? field.value.replace(/^\s+|\s+$/g, "") : "";
+      }
+
+      function downloadIntakeJson() {
+        updateAttachmentSummary();
+
+        var intake = {
+          received_date: fieldValue("contactDate"),
+          contact_type: fieldValue("contactType"),
+          customer_name: fieldValue("customerName"),
+          industry: fieldValue("industry") === "その他" ? fieldValue("industryOther") || "その他" : fieldValue("industry"),
+          consultation: fieldValue("consultation"),
+          expected_attachments: selectedAttachments()
+        };
+
+        var missing = [];
+        if (!intake.received_date) missing.push("応対日");
+        if (!intake.contact_type) missing.push("応対種別");
+        if (!intake.customer_name) missing.push("顧客名");
+        if (!intake.industry) missing.push("業種");
+        if (!intake.consultation) missing.push("相談内容");
+
+        if (missing.length) {
+          window.alert("未入力の必須項目があります。\n" + missing.join("、"));
+          return;
+        }
+
+        var json = JSON.stringify(intake, null, 2);
+        var blob = new Blob([json], { type: "application/json;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        var datePart = intake.received_date.replace(/-/g, "");
+        a.href = url;
+        a.download = "sales-compass-intake-" + datePart + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
       function resetForNextCase() {
         var inputs = document.querySelectorAll("input, select, textarea");
         for (var i = 0; i < inputs.length; i += 1) {
@@ -620,6 +686,7 @@
 
       window.SC_updateAttachmentSummary = updateAttachmentSummary;
       window.SC_resetForNextCase = resetForNextCase;
+      window.SC_downloadIntakeJson = downloadIntakeJson;
       updateAttachmentSummary();
     })();
   </script>
