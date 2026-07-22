@@ -232,6 +232,46 @@
       color: #ffffff;
     }
 
+    .leon-dialog[hidden] {
+      display: none !important;
+    }
+
+    .leon-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.38);
+    }
+
+    .leon-dialog-panel {
+      width: min(100%, 340px);
+      border: 2px solid var(--navy);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 18px;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, 0.22);
+    }
+
+    .leon-dialog-message {
+      margin: 0 0 16px;
+      color: #0b1220;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .leon-dialog-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
     .preview-only {
       display: none;
     }
@@ -421,6 +461,7 @@
       }
 
       .actions,
+      .leon-dialog,
       .notice,
       .hint,
       .edit-only {
@@ -546,8 +587,18 @@
 
     <div class="actions">
       <label class="button primary edit-only" for="previewMode" onclick="SC_updateAttachmentSummary()">受付票を表示</label>
-      <button class="button edit-only" type="button" onclick="SC_downloadIntakeJson()">LEONへ引き継ぐ</button>
+      <button class="button primary preview-only" type="button" onclick="SC_openLeonDialog()">LEONへ引き継ぐ</button>
       <label class="button preview-only" for="previewMode" onclick="SC_resetForNextCase()">入力画面に戻る</label>
+    </div>
+
+    <div id="leonDialog" class="leon-dialog" role="dialog" aria-modal="true" aria-labelledby="leonDialogMessage" hidden>
+      <div class="leon-dialog-panel">
+        <p id="leonDialogMessage" class="leon-dialog-message">案件を受領した。&#10;&#10;incomingへ格納する。</p>
+        <div class="leon-dialog-actions">
+          <button class="button primary" type="button" onclick="SC_confirmLeonHandoff()">格納する</button>
+          <button class="button" type="button" onclick="SC_closeLeonDialog()">キャンセル</button>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -662,7 +713,28 @@
         window.alert("案件を受領した。\n\nincomingへ格納してくれ。\n\n添付資料を待つ。");
       }
 
+      function openLeonDialog() {
+        updateAttachmentSummary();
+        var dialog = document.getElementById("leonDialog");
+        if (dialog) {
+          dialog.hidden = false;
+        }
+      }
+
+      function closeLeonDialog() {
+        var dialog = document.getElementById("leonDialog");
+        if (dialog) {
+          dialog.hidden = true;
+        }
+      }
+
+      function confirmLeonHandoff() {
+        closeLeonDialog();
+        downloadIntakeJson();
+      }
+
       function resetForNextCase() {
+        closeLeonDialog();
         var inputs = document.querySelectorAll("input, select, textarea");
         for (var i = 0; i < inputs.length; i += 1) {
           var item = inputs[i];
@@ -688,6 +760,9 @@
       window.SC_updateAttachmentSummary = updateAttachmentSummary;
       window.SC_resetForNextCase = resetForNextCase;
       window.SC_downloadIntakeJson = downloadIntakeJson;
+      window.SC_openLeonDialog = openLeonDialog;
+      window.SC_closeLeonDialog = closeLeonDialog;
+      window.SC_confirmLeonHandoff = confirmLeonHandoff;
       updateAttachmentSummary();
     })();
   </script>
