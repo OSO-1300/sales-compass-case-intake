@@ -103,6 +103,10 @@ async function run() {
   const repoIndex = await fs.readFile(path.resolve("index.html"), "utf8");
   assert.match(repoIndex, /apple-mobile-web-app-capable/);
   assert.match(repoIndex, /SC_updateAttachmentSummary/);
+  assert.match(repoIndex, /制作・対応依頼/);
+  assert.match(repoIndex, /AI指示/);
+  assert.match(repoIndex, /production_requests/);
+  assert.match(repoIndex, /ai_instructions/);
 
   console.log("All Phase2 Customer & Case Management tests passed.");
 }

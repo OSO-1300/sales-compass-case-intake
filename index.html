@@ -195,7 +195,8 @@
       padding: 0;
     }
 
-    .attachment-summary {
+    .attachment-summary,
+    .preview-summary {
       color: #0b1220;
       font-weight: 700;
       line-height: 1.55;
@@ -338,7 +339,8 @@
       font-weight: 600;
     }
 
-    #previewMode:checked ~ .sheet .attachment-summary {
+    #previewMode:checked ~ .sheet .attachment-summary,
+    #previewMode:checked ~ .sheet .preview-summary {
       display: block;
     }
 
@@ -548,6 +550,29 @@
       </div>
 
       <div class="row">
+        <div class="label">制作・対応依頼 <span class="edit-only">（任意）</span></div>
+        <div class="control">
+          <div class="check-grid edit-only">
+            <label class="check-item"><input type="checkbox" name="productionRequests" value="チラシを準備したい" onchange="SC_updateProductionRequestSummary()">チラシを準備したい</label>
+            <label class="check-item"><input type="checkbox" name="productionRequests" value="比較資料を準備したい" onchange="SC_updateProductionRequestSummary()">比較資料を準備したい</label>
+            <label class="check-item"><input type="checkbox" name="productionRequests" value="提案書を準備したい" onchange="SC_updateProductionRequestSummary()">提案書を準備したい</label>
+            <label class="check-item"><input type="checkbox" name="productionRequests" value="過去資料を流用優先" onchange="SC_updateProductionRequestSummary()">過去資料を流用優先</label>
+            <label class="check-item"><input type="checkbox" name="productionRequests" value="新規制作希望" onchange="SC_updateProductionRequestSummary()">新規制作希望</label>
+          </div>
+          <div id="productionRequestSummary" class="preview-summary preview-only">未指定</div>
+          <div class="hint edit-only">任意。希望がある場合だけ選択します。最終判断と振り分けはLEONが行います。</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">AI指示 <span class="edit-only">（任意）</span></div>
+        <div class="control">
+          <textarea id="aiInstructions" placeholder="例: 製造業向けデザイン希望&#10;社長向け資料にしたい&#10;既存資料を流用したい&#10;シンプルなデザイン希望&#10;比較表も追加したい"></textarea>
+          <div class="hint edit-only">任意。LEONおよび各AI社員への補足指示です。空欄でも受付できます。</div>
+        </div>
+      </div>
+
+      <div class="row">
         <div class="label">回答期限</div>
         <div class="control">
           <input id="replyDeadline" type="date" autocomplete="off">
@@ -586,7 +611,7 @@
     <p class="receipt-note preview-only">この受付票は営業担当者が知っている事実をLEONへ渡すためのものです。営業フェーズ、必要部署、必要成果物、次回アクションはLEONが判断します。</p>
 
     <div class="actions">
-      <label class="button primary edit-only" for="previewMode" onclick="SC_updateAttachmentSummary()">受付票を表示</label>
+      <label class="button primary edit-only" for="previewMode" onclick="SC_prepareReceiptPreview()">受付票を表示</label>
       <button class="button primary preview-only" type="button" onclick="SC_openLeonDialog()">LEONへ引き継ぐ</button>
       <label class="button preview-only" for="previewMode" onclick="SC_resetForNextCase()">入力画面に戻る</label>
     </div>
@@ -647,6 +672,32 @@
         summary.textContent = values.length ? values.join("、") : "添付予定なし";
       }
 
+      function selectedValues(name) {
+        var values = [];
+        var checks = document.querySelectorAll('input[name="' + name + '"]');
+        for (var i = 0; i < checks.length; i += 1) {
+          if (checks[i].checked) {
+            values.push(checks[i].value);
+          }
+        }
+        return values;
+      }
+
+      function updateProductionRequestSummary() {
+        var summary = document.getElementById("productionRequestSummary");
+        if (!summary) {
+          return;
+        }
+
+        var values = selectedValues("productionRequests");
+        summary.textContent = values.length ? values.join("、") : "未指定";
+      }
+
+      function prepareReceiptPreview() {
+        updateAttachmentSummary();
+        updateProductionRequestSummary();
+      }
+
       function selectedAttachments() {
         var values = [];
         var checks = document.querySelectorAll('input[name="attachments"]');
@@ -670,13 +721,17 @@
         return values;
       }
 
+      function selectedProductionRequests() {
+        return selectedValues("productionRequests");
+      }
+
       function fieldValue(id) {
         var field = document.getElementById(id);
         return field ? field.value.replace(/^\s+|\s+$/g, "") : "";
       }
 
       function downloadIntakeJson() {
-        updateAttachmentSummary();
+        prepareReceiptPreview();
 
         var intake = {
           received_date: fieldValue("contactDate"),
@@ -684,6 +739,8 @@
           customer_name: fieldValue("customerName"),
           industry: fieldValue("industry") === "その他" ? fieldValue("industryOther") || "その他" : fieldValue("industry"),
           consultation: fieldValue("consultation"),
+          production_requests: selectedProductionRequests(),
+          ai_instructions: fieldValue("aiInstructions"),
           expected_attachments: selectedAttachments()
         };
 
@@ -714,7 +771,7 @@
       }
 
       function openLeonDialog() {
-        updateAttachmentSummary();
+        prepareReceiptPreview();
         var dialog = document.getElementById("leonDialog");
         if (dialog) {
           dialog.hidden = false;
@@ -754,16 +811,18 @@
         if (date) {
           date.value = today();
         }
-        updateAttachmentSummary();
+        prepareReceiptPreview();
       }
 
+      window.SC_prepareReceiptPreview = prepareReceiptPreview;
       window.SC_updateAttachmentSummary = updateAttachmentSummary;
+      window.SC_updateProductionRequestSummary = updateProductionRequestSummary;
       window.SC_resetForNextCase = resetForNextCase;
       window.SC_downloadIntakeJson = downloadIntakeJson;
       window.SC_openLeonDialog = openLeonDialog;
       window.SC_closeLeonDialog = closeLeonDialog;
       window.SC_confirmLeonHandoff = confirmLeonHandoff;
-      updateAttachmentSummary();
+      prepareReceiptPreview();
     })();
   </script>
 </body>
